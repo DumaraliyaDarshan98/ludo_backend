@@ -1,23 +1,22 @@
 import {Router} from 'express';
 import {AuthController} from '../controllers/AuthController';
-// import {validate, validateEmail, validatePassword, validatePasswordMatch} from '../middleware/validationMiddleware';
 
 const authRoutes = Router();
 const authController = new AuthController();
 
+// Register user
+authRoutes.post('/register', authController.register);
+
 // User Login functionality  
 authRoutes.post('/login', authController.login);
 
-// // User Forgot Password functionality  
-// authRoutes.post('/forgot-password', validate([
-//     validateEmail('email'),
-// ]), authController.forgotPassword);
+// User Login functionality  
+authRoutes.post('/admin-login', authController.adminLogin);
 
-// // User Reset Password functionality  
-// authRoutes.post('/reset-password', validate([
-//     validateEmail('email'),
-//     validatePassword('password'),
-//     validatePasswordMatch('password', 'confirm_password')
-// ]), authController.resetPassword);
+// Verify username
+authRoutes.post('/verify', authController.verifyUserName);
+
+// forgot-password
+authRoutes.post('/forgot-password', authController.forgotPassword);
 
 export default authRoutes;
