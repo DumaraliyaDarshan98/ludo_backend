@@ -85,4 +85,17 @@ export class UserController {
             return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR, error);
         }
     }
+
+    // get user wallet Amount
+    public async getWalletAmount(req:any, res:any) {
+        try {
+            const walletAmount = await AppDataSource.getRepository(User).findOne({
+                where : { id : req?.userId }
+            }); 
+
+            return sendResponse(res, StatusCodes.OK, "User Wallet Amount Successfully Get", { walletAmount : walletAmount?.amount });
+        } catch (error) {
+            return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR, error);
+        }
+    }
 }

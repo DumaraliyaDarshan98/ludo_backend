@@ -10,6 +10,8 @@ userRoutes.post('/user-update', userController.updateUser);
 userRoutes.post('/add-wallet', userController.addWalletAmount);
 userRoutes.get('/wallet-history', userController.walletHistory);
 
+userRoutes.get('/wallet-amount', userController.getWalletAmount);
+
 // withdraw amount
 userRoutes.post('/withdraw-request', userController.addWithdrawRequest);
 userRoutes.get('/withdraw-history', userController.withdrawHistory);
