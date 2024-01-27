@@ -1,4 +1,5 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "./user.entity";
 
 @Entity('withdraws')
 export class Withdraw {
@@ -16,4 +17,8 @@ export class Withdraw {
 
     @CreateDateColumn({ type: 'timestamp', precision: 6, default: () => 'CURRENT_TIMESTAMP(6)' })
     created_on!: Date;
+
+    @ManyToOne(() => User)
+    @JoinColumn({ name: "user_id", referencedColumnName: "id" })
+    userDetail!: User;
 }
