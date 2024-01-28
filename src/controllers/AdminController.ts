@@ -48,6 +48,29 @@ export class AdminController {
         }
     }
 
+    // Change user status to admin
+    public async changeUserStatus(req: any, res: any) {
+        const userData = req?.body;
+        try {
+            const existUser: any = await AppDataSource.getRepository(User).findOne({
+                where: { id: userData?.id }
+            });
+
+            if (!existUser) {
+                return errorResponse(res, StatusCodes.NOT_FOUND, 'User Not Found');
+            }
+
+            existUser['status'] = userData?.status;
+
+            const updateUser = await AppDataSource.getRepository(User).save(existUser);
+
+            return sendResponse(res, StatusCodes.OK, "User Status Updated Successfully", updateUser);
+        } catch (error) {
+            return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR, error);
+        }
+    }
+
+
     // get wallet list
     public async getWalletList(req: any, res: any) {
         try {
@@ -73,7 +96,7 @@ export class AdminController {
                 return errorResponse(res, StatusCodes.NOT_FOUND, 'Wallet Details Not Found');
             }
 
-            if(walletDetails['status'] === 1 && status == 2) {
+            if (walletDetails['status'] === 1 && status == 2) {
                 const userDetails: any = await AppDataSource.getRepository(User).findOne({
                     where: { id: walletDetails?.user_id }
                 });
@@ -109,7 +132,7 @@ export class AdminController {
                 await AppDataSource.getRepository(User).save(userDetails);
             }
 
-            return sendResponse(res, StatusCodes.OK, "User Wallet History Find Successfully", walletAction);
+            return sendResponse(res, StatusCodes.OK, "User Wallet Updated Successfully", walletAction);
         } catch (error) {
             return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR, error);
         }
@@ -123,6 +146,62 @@ export class AdminController {
                 relations: ['userDetail']
             });
             return sendResponse(res, StatusCodes.OK, "User Withdraw History Find Successfully", withdrawList);
+        } catch (error) {
+            return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR, error);
+        }
+    }
+
+
+    //  approve money to wallet or decline monet to wallet
+    public async actionOnWithdraw(req: any, res: any) {
+        try {
+            const { id, status } = req?.body;
+
+            const walletDetails = await AppDataSource.getRepository(Withdraw).findOne({
+                where: { id: id }
+            });
+
+            if (!walletDetails) {
+                return errorResponse(res, StatusCodes.NOT_FOUND, 'Wallet Details Not Found');
+            }
+
+            if (walletDetails['status'] === 1 && status == 2) {
+                const userDetails: any = await AppDataSource.getRepository(User).findOne({
+                    where: { id: walletDetails?.user_id }
+                });
+
+                if (walletDetails['amount'] == '0' || !walletDetails['amount']) {
+                    walletDetails['amount'] = '0';
+                }
+
+                const totalAmount = Number(userDetails['amount']) + Number(walletDetails['amount']);
+
+                userDetails['amount'] = String(totalAmount);
+
+                await AppDataSource.getRepository(User).save(userDetails);
+            }
+
+            walletDetails['status'] = status;
+
+            const walletAction = await AppDataSource.getRepository(Withdraw).save(walletDetails);
+
+            if (walletAction['status'] === 1) {
+                const userDetails: any = await AppDataSource.getRepository(User).findOne({
+                    where: { id: walletAction?.user_id }
+                });
+
+                if (walletAction['amount'] == '0' || !walletAction['amount']) {
+                    walletAction['amount'] = '0';
+                }
+
+                const totalAmount = Number(userDetails['amount']) - Number(walletAction['amount']);
+
+                userDetails['amount'] = String(totalAmount);
+
+                await AppDataSource.getRepository(User).save(userDetails);
+            }
+
+            return sendResponse(res, StatusCodes.OK, "User Withdraw Updated Successfully", walletAction);
         } catch (error) {
             return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR, error);
         }

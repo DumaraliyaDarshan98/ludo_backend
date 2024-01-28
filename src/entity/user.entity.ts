@@ -25,6 +25,9 @@ export class User {
 
     @Column({ type: 'int', default : 0 })
     role!: number;
+
+    @Column({ type: 'int', default : 1 })
+    status!: number;
     
     @Column({ type: 'varchar', length: 255, nullable: true })
     refer_code!: string;
