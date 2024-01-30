@@ -5,6 +5,7 @@ import { verifyToken } from "../middleware/tokenMiddleware";
 import adminAuthRoutes from "./adminAuthRoute";
 import adminRoute from "./adminRoute";
 import userCommonRoute from "./userCommonRoute";
+import gameRoute from "./gameRoute";
 
 const mainRoutes = Router();
 
@@ -16,5 +17,8 @@ mainRoutes.use('/user-common', userCommonRoute);
 // Admin APIS
 mainRoutes.use('/admin/auth', adminAuthRoutes);
 mainRoutes.use('/admin', verifyToken, adminRoute);
+
+// Game APIs
+mainRoutes.use("/game", verifyToken, gameRoute);
 
 export default mainRoutes;
