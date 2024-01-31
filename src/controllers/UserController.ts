@@ -5,6 +5,7 @@ import { User } from "../entity/user.entity";
 import { INTERNAL_SERVER_ERROR } from "../constants/message";
 import { UserWallet } from "../entity/wallet.entity";
 import { Withdraw } from "../entity/withdraw.entity";
+import './../cron';
 
 export class UserController {
     public async updateUser(req: any, res: any) {

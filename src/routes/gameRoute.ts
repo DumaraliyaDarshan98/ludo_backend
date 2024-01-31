@@ -5,7 +5,14 @@ const gameRoute = Router();
 const gameController = new GameController();
 
 // get user list
-gameRoute.get('/get-game-code', gameController.getGameCode);
+gameRoute.post('/get-game-code', gameController.getGameCode);
+
+// get game list
+gameRoute.get('/get-battle-list', gameController.getGameBattle);
+
+// play-game
+gameRoute.post('/pay-game', gameController.playGame);
+
 // get user list
 gameRoute.post('/get-game-result', gameController.getGameResult);
 
