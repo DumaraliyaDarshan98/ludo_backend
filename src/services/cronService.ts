@@ -39,7 +39,7 @@ export async function updateGameResult() {
         if(options.params.roomcode != '000000') {
             const ludoResponse = await axios.request(options);
 
-            console.log('ludoResponse?.data?.Status', ludoResponse)
+            console.log('ludoResponse?.data?.Status', ludoResponse?.data)
 
             if(ludoResponse?.data?.Status == LudoGameStatus.Running || ludoResponse?.data?.Status == LudoGameStatus.Finished) {
                 const payload : any = {

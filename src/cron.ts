@@ -8,3 +8,6 @@ const gameResultCron = () => {
 
 // cron run every second
 cron.schedule('*/4 * * * *', gameResultCron);
+
+// cron run every second
+// cron.schedule('*/30 * * * * *', gameResultCron);

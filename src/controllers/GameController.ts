@@ -7,6 +7,7 @@ import { User } from '../entity/user.entity';
 import { LudoGameStatus } from '../constants/gameStatus';
 import { GameTable } from '../entity/gameTable.entity';
 import { AdminCommission } from '../entity/adminCommission.entity';
+import { getIO } from '../socket/socket';
 
 export class GameController {
     public async getGameCode(req: any, res: any) {
@@ -24,14 +25,14 @@ export class GameController {
             const getCommission = await AppDataSource.getRepository(AdminCommission).find();
 
             // origin data
-            const options = {
-                method: 'GET',
-                url: 'https://ludoking-api-with-result.p.rapidapi.com/rapidapi/results/classic/',
-                headers: {
-                    'X-RapidAPI-Key': 'cdb375f6ccmsh5c088e8ad7ca632p1e0041jsn2fe08856ffac',
-                    'X-RapidAPI-Host': 'ludoking-api-with-result.p.rapidapi.com'
-                }
-            };
+            // const options = {
+            //     method: 'GET',
+            //     url: 'https://ludoking-api-with-result.p.rapidapi.com/rapidapi/results/classic/',
+            //     headers: {
+            //         'X-RapidAPI-Key': 'cdb375f6ccmsh5c088e8ad7ca632p1e0041jsn2fe08856ffac',
+            //         'X-RapidAPI-Host': 'ludoking-api-with-result.p.rapidapi.com'
+            //     }
+            // };
 
             // testing data
             // const options = {
@@ -44,13 +45,13 @@ export class GameController {
             // };
 
 
-            const gameCodeAPIRes: any = await axios.request(options);
+            // const gameCodeAPIRes: any = await axios.request(options);
 
-            if (!gameCodeAPIRes?.data['roomcode']) {
-                return errorResponse(res, StatusCodes.NOT_FOUND, 'Game Code Not Found');
-            }
+            // if (!gameCodeAPIRes?.data['roomcode']) {
+            //     return errorResponse(res, StatusCodes.NOT_FOUND, 'Game Code Not Found');
+            // }
 
-            // const gameCode = "09287844";
+            const gameCode = "09287844";
 
             // Calculate winner amount and owner commission amount
             const commissionPer = getCommission[0]?.commission || 2;
@@ -61,7 +62,8 @@ export class GameController {
 
             const payload = {
                 user_id: userDetails?.id,
-                game_code: gameCodeAPIRes?.data['roomcode'],
+                // game_code: gameCodeAPIRes?.data['roomcode'],
+                game_code : gameCode,
                 amount: gameTableDetails?.amount,
                 winner_amount: String(winnerAmount),
                 owner_commision: String(ownerCommission),
@@ -72,6 +74,9 @@ export class GameController {
             }
 
             const createGameTable = await AppDataSource.getRepository(GameTable).save(payload);
+            
+            const io = getIO();
+            io.emit('create_battle', { title : 'Create Game'});
 
             return sendResponse(res, StatusCodes.OK, "Get Table Created.", createGameTable);
         } catch (error) {
@@ -153,6 +158,9 @@ export class GameController {
             battleDetails['is_running'] = 1;
 
             await AppDataSource.getRepository(GameTable).save(battleDetails);
+            
+            const io = getIO();
+            io.emit('play_game', { title : 'Create Game'});
 
             return sendResponse(res, StatusCodes.OK, "Play Game SuccessFully", playerDetails);
         } catch (error) {

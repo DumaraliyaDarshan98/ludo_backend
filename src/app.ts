@@ -2,6 +2,7 @@ import express from 'express';
 import AppDataSource from "./data-source"
 import cors from 'cors';
 import mainRoutes from './routes/mainRoute';
+import { rootSocket } from './socket/socket';
 // import { rootSocket } from './socket/socket';
 
 const PORT = process.env.PORT || 4100;
@@ -32,4 +33,4 @@ const httpServer = app.listen(PORT, () => {
 });
 
 
-// rootSocket(httpServer);
+rootSocket(httpServer);
