@@ -99,4 +99,27 @@ export class UserController {
             return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR, error);
         }
     }
+
+    // update user ludo name
+    public async updateLudoName(req: any, res:any) {
+        try {
+            let { ludo_name , user_id } = req?.body;
+
+            const getUser = await AppDataSource.getRepository(User).findOne({
+                where : { id : user_id }
+            });
+
+            if (!getUser) {
+                return errorResponse(res, StatusCodes.NOT_FOUND, 'User Not Found');
+            }
+
+            getUser['ludo_name'] = ludo_name;
+
+            await AppDataSource.getRepository(User).save(getUser);
+
+            return sendResponse(res, StatusCodes.OK, "User Wallet Amount Successfully Get", { ludo_name: ludo_name })
+        } catch (error) {
+            return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR, error);
+        }
+    }
 }

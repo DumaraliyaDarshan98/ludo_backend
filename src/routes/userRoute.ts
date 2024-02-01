@@ -16,4 +16,7 @@ userRoutes.get('/wallet-amount', userController.getWalletAmount);
 userRoutes.post('/withdraw-request', userController.addWithdrawRequest);
 userRoutes.get('/withdraw-history', userController.withdrawHistory);
 
+// update user ludo name
+userRoutes.post('/update-ludo-name', userController.updateLudoName);
+
 export default userRoutes;
