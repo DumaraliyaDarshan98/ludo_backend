@@ -21,4 +21,7 @@ adminRoute.post('/withdraw-action', adminController.actionOnWithdraw);
 adminRoute.post("/add-edit-contact-us", adminController.addEditContactUs);
 adminRoute.get("/get-contact-us", adminController.getContactUs);
 
+// Dashboard details
+adminRoute.get("/get-dashboard-details", adminController.getDashboardDetails);
+
 export default adminRoute;

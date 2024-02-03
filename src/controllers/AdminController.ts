@@ -6,6 +6,8 @@ import { INTERNAL_SERVER_ERROR } from "../constants/message";
 import { UserWallet } from "../entity/wallet.entity";
 import { Withdraw } from "../entity/withdraw.entity";
 import { ContactUs } from "../entity/contactUs.entity";
+import { GameTable } from "../entity/gameTable.entity";
+import { AdminCommission } from "../entity/adminCommission.entity";
 
 export class AdminController {
     public async updateAdmin(req: any, res: any) {
@@ -226,6 +228,68 @@ export class AdminController {
             const contactUsDetails = await AppDataSource.getRepository(ContactUs).find();
 
             return sendResponse(res, StatusCodes.OK, "Get Contact Details Successfully.", contactUsDetails[0]);
+        } catch (error) {
+            return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR, error);
+        }
+    }
+
+    // Get dashboard details 
+    public async getDashboardDetails(req: any, res: any) {
+        try {
+
+            // total user
+            const totalUser = await AppDataSource.getRepository(User).count();
+
+            // total play game  
+            const gameList =await AppDataSource.getRepository(GameTable).find({
+                where :{ is_running : 2 }
+            })
+
+            const totalPlayGame = gameList?.length;
+
+            let adminCommissionAmount = 0;
+
+            gameList?.map((element) => {
+                adminCommissionAmount = Number(adminCommissionAmount) + Number(element?.owner_commision);
+            });
+
+            // admin commission
+            const adminCommissionData = await AppDataSource.getRepository(AdminCommission).find();
+
+            // total wallet amount
+            const walletData = await AppDataSource.getRepository(UserWallet).find({
+                where : { status : 1 }
+            });
+
+            let totalWalletAmount = 0;
+
+            walletData?.map((element) => {
+                totalWalletAmount = Number(totalWalletAmount) + Number(element?.amount);
+            });
+
+            //  total withdrawal amount
+            const withdrawData = await AppDataSource.getRepository(Withdraw).find({
+                where : { status : 1 }
+            });
+
+            let totalWithdrawAmount = 0;
+
+            withdrawData?.map((element) => {
+                totalWithdrawAmount = Number(totalWithdrawAmount) + Number(element?.amount);
+            });
+
+            // all details
+            const dashBoardDetails = {
+                totalUser : totalUser,
+                totalPlayGame: totalPlayGame,
+                adminCommission : adminCommissionData[0]?.commission,
+                totalWallet : totalWalletAmount,
+                totalWithdraw : totalWithdrawAmount,
+                totalAdminCommission : adminCommissionAmount
+            }
+            
+            return sendResponse(res, StatusCodes.OK, "Successfully get dashboard details", dashBoardDetails);
+
         } catch (error) {
             return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR, error);
         }
