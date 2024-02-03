@@ -4,16 +4,21 @@ import { GameController } from '../controllers/GameController';
 const gameRoute = Router();
 const gameController = new GameController();
 
-// get user list
+// create game table
 gameRoute.post('/get-game-code', gameController.getGameCode);
+// get game table
+gameRoute.get('/get-game-table/:id', gameController.getGameTable);
 
-// get game list
+// get battle list
 gameRoute.get('/get-battle-list', gameController.getGameBattle);
 
-// play-game
+// play-game user click to pay button
 gameRoute.post('/pay-game', gameController.playGame);
 
-// get user list
+// get game history for particular user
+gameRoute.get('/get-game-history', gameController.getGameHistoryUser);
+
+// get game result API  for testing
 gameRoute.post('/get-game-result', gameController.getGameResult);
 
 export default gameRoute;

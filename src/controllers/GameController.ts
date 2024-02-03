@@ -63,7 +63,7 @@ export class GameController {
             const payload = {
                 user_id: userDetails?.id,
                 // game_code: gameCodeAPIRes?.data['roomcode'],
-                game_code : gameCode,
+                game_code: gameCode,
                 amount: gameTableDetails?.amount,
                 winner_amount: String(winnerAmount),
                 owner_commision: String(ownerCommission),
@@ -74,9 +74,9 @@ export class GameController {
             }
 
             const createGameTable = await AppDataSource.getRepository(GameTable).save(payload);
-            
+
             const io = getIO();
-            io.emit('create_battle', { title : 'Create Game'});
+            io.emit('create_battle', { title: 'Create Game' });
 
             return sendResponse(res, StatusCodes.OK, "Get Table Created.", createGameTable);
         } catch (error) {
@@ -117,7 +117,7 @@ export class GameController {
     public async getGameBattle(req: any, res: any) {
         try {
             const gameHistory = await AppDataSource.getRepository(GameTable).find({
-                order : { id: 'DESC' }
+                order: { id: 'DESC' }
             });
 
             return sendResponse(res, StatusCodes.OK, "Game History  List", gameHistory);
@@ -132,7 +132,7 @@ export class GameController {
         const playerDetails = req?.body;
         try {
             const gameHistory = await AppDataSource.getRepository(GameTable).find({
-                order : { id: 'DESC' }
+                order: { id: 'DESC' }
             });
 
             const userDetails = await AppDataSource.getRepository(User).findOne({
@@ -144,7 +144,7 @@ export class GameController {
             }
 
             const battleDetails = await AppDataSource.getRepository(GameTable).findOne({
-                where: { id : playerDetails?.battle_id }
+                where: { id: playerDetails?.battle_id }
             });
 
             if (!battleDetails) {
@@ -158,11 +158,46 @@ export class GameController {
             battleDetails['is_running'] = 1;
 
             await AppDataSource.getRepository(GameTable).save(battleDetails);
-            
+
             const io = getIO();
-            io.emit('play_game', { title : 'Create Game'});
+            io.emit('play_game', { title: 'Create Game' });
 
             return sendResponse(res, StatusCodes.OK, "Play Game SuccessFully", playerDetails);
+        } catch (error) {
+            console.error(error);
+            return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR, error);
+        }
+    }
+
+    // get game table
+    public async getGameTable(req: any, res: any) {
+        const gameBattleId = Number(req.params.id);
+        try {
+
+            const getBattle = await AppDataSource.getRepository(GameTable).findOne({
+                where: { id: gameBattleId }
+            });
+
+            if(!getBattle) {
+                return errorResponse(res, StatusCodes.NOT_FOUND, 'Game Battle not found');
+            } 
+
+            return sendResponse(res, StatusCodes.OK, "Get Game Battle SuccessFully", getBattle);
+        } catch (error) {
+            console.error(error);
+            return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR, error);
+        }
+    }
+
+    //  get game history for particular user
+    public async getGameHistoryUser(req: any, res:any) {
+        try {
+            const gameHistory = await AppDataSource.getRepository(GameTable).find({
+                where : [ { p1_id : req?.userId }, { p2_id : req?.userId }, { is_running : 1 }, { is_running : 2 }],
+                relations: ['playerOne', 'playerTwo']
+            });
+
+            return sendResponse(res, StatusCodes.OK, "Get Game Battle  History Successfully.", gameHistory);
         } catch (error) {
             console.error(error);
             return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR, error);
