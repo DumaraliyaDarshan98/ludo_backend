@@ -241,8 +241,8 @@ export class AdminController {
             const totalUser = await AppDataSource.getRepository(User).count();
 
             // total play game  
-            const gameList =await AppDataSource.getRepository(GameTable).find({
-                where :{ is_running : 2 }
+            const gameList = await AppDataSource.getRepository(GameTable).find({
+                where: { is_running: 2 }
             })
 
             const totalPlayGame = gameList?.length;
@@ -258,7 +258,7 @@ export class AdminController {
 
             // total wallet amount
             const walletData = await AppDataSource.getRepository(UserWallet).find({
-                where : { status : 1 }
+                where: { status: 1 }
             });
 
             let totalWalletAmount = 0;
@@ -269,7 +269,7 @@ export class AdminController {
 
             //  total withdrawal amount
             const withdrawData = await AppDataSource.getRepository(Withdraw).find({
-                where : { status : 1 }
+                where: { status: 1 }
             });
 
             let totalWithdrawAmount = 0;
@@ -280,16 +280,40 @@ export class AdminController {
 
             // all details
             const dashBoardDetails = {
-                totalUser : totalUser,
+                totalUser: totalUser,
                 totalPlayGame: totalPlayGame,
-                adminCommission : adminCommissionData[0]?.commission,
-                totalWallet : totalWalletAmount,
-                totalWithdraw : totalWithdrawAmount,
-                totalAdminCommission : adminCommissionAmount
+                adminCommission: adminCommissionData[0]?.commission,
+                totalWallet: totalWalletAmount,
+                totalWithdraw: totalWithdrawAmount,
+                totalAdminCommission: adminCommissionAmount
             }
-            
+
             return sendResponse(res, StatusCodes.OK, "Successfully get dashboard details", dashBoardDetails);
 
+        } catch (error) {
+            return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR, error);
+        }
+    }
+
+    // add edit commission details
+    public async addEditAdminCommission(req: any, res: any) {
+        try {
+            const commissionDetails = req?.body;
+
+            const addEditCommissionDetails = await AppDataSource.getRepository(AdminCommission).save(commissionDetails);
+
+            return sendResponse(res, StatusCodes.OK, "Add Edit Commission Details Successfully.", addEditCommissionDetails);
+        } catch (error) {
+            return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR, error);
+        }
+    }
+
+    // Get admin commission details
+    public async getAdminCommission(req: any, res: any) {
+        try {
+            const commissionDetails = await AppDataSource.getRepository(AdminCommission).find();
+
+            return sendResponse(res, StatusCodes.OK, "Get Commission Details Successfully.", commissionDetails[0]);
         } catch (error) {
             return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR, error);
         }

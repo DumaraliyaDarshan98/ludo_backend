@@ -5,7 +5,7 @@ export class AdminCommission {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @Column({ type: 'int', default : 5 })
+    @Column({ type: 'int', default : 2 })
     commission!: number;
 
     @Column({ type: 'int', default : 1 })
