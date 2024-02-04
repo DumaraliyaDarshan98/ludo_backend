@@ -178,9 +178,9 @@ export class GameController {
                 where: { id: gameBattleId }
             });
 
-            if(!getBattle) {
+            if (!getBattle) {
                 return errorResponse(res, StatusCodes.NOT_FOUND, 'Game Battle not found');
-            } 
+            }
 
             return sendResponse(res, StatusCodes.OK, "Get Game Battle SuccessFully", getBattle);
         } catch (error) {
@@ -190,11 +190,26 @@ export class GameController {
     }
 
     //  get game history for particular user
-    public async getGameHistoryUser(req: any, res:any) {
+    public async getGameHistoryUser(req: any, res: any) {
         try {
             const gameHistory = await AppDataSource.getRepository(GameTable).find({
-                where : [ { p1_id : req?.userId }, { p2_id : req?.userId }, { is_running : 1 }, { is_running : 2 }],
+                where: [{ p1_id: req?.userId }, { p2_id: req?.userId }, { is_running: 1 }, { is_running: 2 }],
                 relations: ['playerOne', 'playerTwo']
+            });
+
+            return sendResponse(res, StatusCodes.OK, "Get Game Battle  History Successfully.", gameHistory);
+        } catch (error) {
+            console.error(error);
+            return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR, error);
+        }
+    }
+
+    //  get game history for admin
+    public async getGameHistoryAdmin(req: any, res: any) {
+        try {
+            const gameHistory = await AppDataSource.getRepository(GameTable).find({
+                relations: ['playerOne', 'playerTwo'],
+                order : { id : 'DESC'}
             });
 
             return sendResponse(res, StatusCodes.OK, "Get Game Battle  History Successfully.", gameHistory);

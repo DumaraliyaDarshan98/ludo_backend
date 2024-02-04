@@ -238,11 +238,13 @@ export class AdminController {
         try {
 
             // total user
-            const totalUser = await AppDataSource.getRepository(User).count();
+            const totalUser = await AppDataSource.getRepository(User).count({
+                where: { role: 0 },
+            });
 
             // total play game  
             const gameList = await AppDataSource.getRepository(GameTable).find({
-                where: { is_running: 2 }
+                where: [{ is_running: 1 }, { is_running: 2 }]
             })
 
             const totalPlayGame = gameList?.length;
