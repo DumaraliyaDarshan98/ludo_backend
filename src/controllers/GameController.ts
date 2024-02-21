@@ -51,8 +51,6 @@ export class GameController {
                 return errorResponse(res, StatusCodes.NOT_FOUND, 'Game Code Not Found');
             }
 
-            console.log('gameCodeAPIRes', gameCodeAPIRes);
-
             // const gameCode = "09287844";
 
             // Calculate winner amount and owner commission amount
@@ -70,9 +68,9 @@ export class GameController {
                 winner_amount: String(winnerAmount),
                 owner_commision: String(ownerCommission),
                 game_owner_id: userDetails?.id,
-                p1_name: gameTableDetails?.name || userDetails?.ludo_name,
-                p1_status: LudoGameStatus.Waiting,
-                p1_id: userDetails?.id,
+                // p1_name: gameTableDetails?.name || userDetails?.ludo_name,
+                // p1_status: LudoGameStatus.Waiting,
+                // p1_id: userDetails?.id,
             }
 
             const createGameTable = await AppDataSource.getRepository(GameTable).save(payload);
@@ -118,9 +116,27 @@ export class GameController {
     // get game list
     public async getGameBattle(req: any, res: any) {
         try {
-            const gameHistory = await AppDataSource.getRepository(GameTable).find({
-                order: { id: 'DESC' }
+            const gameList = await AppDataSource.getRepository(GameTable).find({
+                order: { id: 'DESC' },
             });
+
+            const runningHistoryGame = await AppDataSource.getRepository(GameTable).find({
+                order: { id: 'DESC' },
+                where: [{ p1_id: req?.userId }, { p2_id: req?.userId }],
+            });
+            let runningHistory : any = [];
+
+            await runningHistoryGame.map((element) => {
+                if (element?.status == 2 || element?.status == 3) {
+                    runningHistory.push(element);
+                }
+            });
+
+            console.log('runningHistoryrunningHistoryrunningHistory', runningHistory, runningHistoryGame)
+            const gameHistory = {
+                runningGameList: runningHistory,
+                gameList: gameList
+            }
 
             return sendResponse(res, StatusCodes.OK, "Game History  List", gameHistory);
         } catch (error) {
@@ -157,6 +173,7 @@ export class GameController {
             battleDetails['p2_id'] = playerDetails?.user_id || req?.userId;
             battleDetails['p2_status'] = LudoGameStatus.Running;
             battleDetails['p1_status'] = LudoGameStatus.Running;
+            // battleDetails['status'] = 2;
             battleDetails['is_running'] = 1;
 
             await AppDataSource.getRepository(GameTable).save(battleDetails);
@@ -178,7 +195,7 @@ export class GameController {
 
             const getBattle = await AppDataSource.getRepository(GameTable).findOne({
                 where: { id: gameBattleId },
-                relations : ['playerOne', 'playerTwo', 'gameOwner', 'gameUserResults']
+                relations: ['playerOne', 'playerTwo', 'gameOwner', 'gameUserResults']
             });
 
             if (!getBattle) {
@@ -298,7 +315,7 @@ export class GameController {
         try {
             const cancelPayload: any = req?.body;
 
-            if(!cancelPayload?.cancel_reasone) {
+            if (!cancelPayload?.cancel_reasone) {
                 return errorResponse(res, StatusCodes.NOT_FOUND, 'PLease add reason.');
             }
 
@@ -318,7 +335,7 @@ export class GameController {
                 const payload: any = {
                     game_table_id: Number(cancelPayload?.game_table_id),
                     cancel_user_id: req?.userId,
-                    cancel_reasone : cancelPayload?.cancel_reasone
+                    cancel_reasone: cancelPayload?.cancel_reasone
                 }
                 savedDetails = await AppDataSource.getRepository(GameUserResult).save(payload);
             }

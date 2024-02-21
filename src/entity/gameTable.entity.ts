@@ -54,6 +54,9 @@ export class GameTable {
     @Column({ type: 'int', default : 1 })
     is_active!: number;
 
+    @Column({ type: 'int', default: 1 })
+    status!: number; // 1 : Created, 2: Requested, 3: Running, 4: Completed, 4: Cancel   
+
     @CreateDateColumn({ type: 'timestamp', precision: 6, default: () => 'CURRENT_TIMESTAMP(6)' })
     created_on!: Date;
 
