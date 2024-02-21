@@ -132,7 +132,6 @@ export class GameController {
                 }
             });
 
-            console.log('runningHistoryrunningHistoryrunningHistory', runningHistory, runningHistoryGame)
             const gameHistory = {
                 runningGameList: runningHistory,
                 gameList: gameList
