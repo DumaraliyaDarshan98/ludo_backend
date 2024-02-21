@@ -1,5 +1,6 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "./user.entity";
+import { GameUserResult } from "./gameUserResult.entity";
 @Entity('game_table')
 export class GameTable {
     @PrimaryGeneratedColumn()
@@ -63,4 +64,11 @@ export class GameTable {
     @ManyToOne(() => User)
     @JoinColumn({ name: "p2_id", referencedColumnName: "id" })
     playerTwo!: User;
+
+    @ManyToOne(() => User)
+    @JoinColumn({ name: "game_owner_id", referencedColumnName: "id" })
+    gameOwner!: User;
+
+    @OneToMany(() => GameUserResult, gameUserResult => gameUserResult.gameTable)
+    gameUserResults!: GameUserResult[];
 }

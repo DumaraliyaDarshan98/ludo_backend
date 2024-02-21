@@ -177,7 +177,8 @@ export class GameController {
         try {
 
             const getBattle = await AppDataSource.getRepository(GameTable).findOne({
-                where: { id: gameBattleId }
+                where: { id: gameBattleId },
+                relations : ['playerOne', 'playerTwo', 'gameOwner', 'gameUserResults']
             });
 
             if (!getBattle) {
