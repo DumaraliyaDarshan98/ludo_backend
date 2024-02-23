@@ -402,4 +402,20 @@ export class GameController {
             return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR, error);
         }
     }
+
+    // function to get the verify game result
+    public async verifyGameResult(req:any, res:any) {
+        try {
+            const { game_table_id } = req?.body;
+
+            const gameData = await AppDataSource.getRepository(GameUserResult).findOne({
+                where : [ { game_table_id : game_table_id }, { winner_user_id : req?.userId }, { loose_user_id : req?.userId }, { cancel_user_id : req?.userId }]
+            })
+            console.log(game_table_id);
+            return sendResponse(res, StatusCodes.OK, "Verify Game Result", gameData);
+        } catch (error) {
+            console.error('Verify Game Result : ', error);
+            return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR, error);
+        }
+    }
 }
