@@ -1,35 +1,22 @@
 import { Router } from "express";
-import { GameController } from '../controllers/GameController';
-import { upload } from "../core/multerConfig";
+import { GameController } from "../controllers/GameController";
 
 const gameRoute = Router();
 const gameController = new GameController();
 
-// create game table
-gameRoute.post('/get-game-code', gameController.getGameCode);
-// get game table
-gameRoute.get('/get-game-table/:id', gameController.getGameTable);
+// Create game
+gameRoute.post('/create-game', gameController.createGame);
 
-// get battle list
-gameRoute.get('/get-battle-list', gameController.getGameBattle);
+// cancel game (Delete game)
+gameRoute.delete('/cancel-game/:id', gameController.deleteGame);
 
-// play-game user click to pay button
-gameRoute.post('/pay-game', gameController.playGame);
+// click to play button start the game
+gameRoute.post('/play-game', gameController.playGame);
 
-// get game history for particular user
-gameRoute.get('/get-game-history', gameController.getGameHistoryUser);
+// click to play button start the game
+gameRoute.get('/start-game/:id', gameController.startGame);
 
-// get game history for particular user
-gameRoute.get('/get-admin-game-history', gameController.getGameHistoryAdmin);
-
-// get game result API  for testing
-gameRoute.post('/get-game-result', gameController.getGameResult);
-
-// after show game code user can add winning and verify game result
-gameRoute.post('/win-game',upload.array('file', 1), gameController.winGameResult); // For the win game
-gameRoute.post('/loose-game', gameController.looseGameResult); // for the loose the game 
-gameRoute.post('/cancel-game', gameController.cancelGame); // cancel game
-
-gameRoute.get('/cancel-reason-list', gameController.cancelReasonList); // cancel game
+// click to play button start the game
+gameRoute.get('/game-list', gameController.gameList);
 
 export default gameRoute;
