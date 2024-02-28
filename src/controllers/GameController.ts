@@ -163,6 +163,15 @@ export class GameController {
             const io = getIO();
             io.emit('create_battle', { title: 'Create Game' });
 
+
+            // await AppDataSource.getRepository(GamePlayer).delete({
+            //     p_id: playerDetails?.user_id, p_status: PlayerStatus.Created
+            // });
+
+            // await AppDataSource.getRepository(GameTable).delete({
+            //     game_owner_id: playerDetails?.user_id, status: GameStatus.Created
+            // }); 
+
             return sendResponse(res, StatusCodes.OK, "Game Played Successfully", gameDetails);
         } catch (error) {
             console.log('Error play game', error);
@@ -196,23 +205,25 @@ export class GameController {
                     where: { p_id: element['p_id'] }
                 });
 
-                gameList?.map(async (game: any) => {
+                await gameList?.map(async (game: any) => {
                     if (game?.game_table_id != gameBattleId) {
                         const data: any = await AppDataSource.getRepository(GameTable).findOne({
                             where: { id: game?.game_table_id }
                         });
 
                         data['status'] = GameStatus.Created
-                        await AppDataSource.getRepository(GameTable).save(data);
                         await AppDataSource.getRepository(GamePlayer).delete({
                             id: game?.id
+                        });
+                        await AppDataSource.getRepository(GameTable).delete({
+                            id: game?.game_table_id
                         });
                     }
                 })
             });
 
             const io = getIO();
-            io.emit('create_battle', { title: 'Create Game' });
+            await io.emit('create_battle', { title: 'Create Game' });
 
             return sendResponse(res, StatusCodes.OK, "Successfully", gameDetails);
         } catch (error) {
@@ -243,6 +254,27 @@ export class GameController {
         } catch (error) {
             console.log('Error Listing game', error);
             return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // get game table
+    public async getGameTable(req: any, res: any) {
+        const gameBattleId = Number(req.params.id);
+        try {
+
+            const getBattle = await AppDataSource.getRepository(GameTable).findOne({
+                where: { id: gameBattleId },
+                relations: ['gameOwner', 'gamePlayer']
+            });
+
+            if (!getBattle) {
+                return errorResponse(res, StatusCodes.NOT_FOUND, 'Game Battle not found');
+            }
+
+            return sendResponse(res, StatusCodes.OK, "Get Game Battle SuccessFully", getBattle);
+        } catch (error) {
+            console.error(error);
+            return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR, error);
         }
     }
 }

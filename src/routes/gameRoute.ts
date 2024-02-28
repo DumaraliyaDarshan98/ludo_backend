@@ -19,4 +19,6 @@ gameRoute.get('/start-game/:id', gameController.startGame);
 // click to play button start the game
 gameRoute.get('/game-list', gameController.gameList);
 
+gameRoute.get('/get-game-table/:id', gameController.getGameTable);
+
 export default gameRoute;
