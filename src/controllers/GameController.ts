@@ -57,7 +57,8 @@ export class GameController {
             // Calculate winner amount and owner commission amount
             const commissionPer = getCommission[0]?.commission || 0;
 
-            const ownerCommission = ((Number(gameTableDetails?.amount) * 2) * commissionPer) / 100;
+            // const ownerCommission = ((Number(gameTableDetails?.amount) * 2) * commissionPer) / 100;
+            const ownerCommission = (Number(gameTableDetails?.amount) * commissionPer) / 100;
 
             const winnerAmount = (Number(gameTableDetails?.amount) * 2) - ownerCommission;
 
