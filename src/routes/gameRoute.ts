@@ -26,4 +26,7 @@ gameRoute.post('/win-game',upload.array('file', 1), gameController.winGameResult
 gameRoute.post('/loose-game', gameController.looseGameResult); // for the loose the game 
 // gameRouteOld.post('/cancel-game', gameController.cancelGame); // cancel game
 
+// get game history for particular user
+gameRoute.get('/get-game-history', gameController.getGameHistoryUser);
+
 export default gameRoute;
