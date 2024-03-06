@@ -133,8 +133,8 @@ export class UserController {
                 //     "notify_url": "http://localhost:4200/#/login"
                 // },
                 link_meta: {
-                    "return_url": `http://localhost:4200/#/home/verify-payment/${orderId}`,
-                    "notify_url": `http://localhost:4200/#/home/verify-payment/${orderId}`
+                    "return_url": `https://test.megaludo24.com/#/home/verify-payment/${orderId}`,
+                    "notify_url": `https://test.megaludo24.com/#/home/verify-payment/${orderId}`
                 },
                 link_id: orderId,
                 link_amount: Number(amount),
