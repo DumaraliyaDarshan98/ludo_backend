@@ -112,7 +112,11 @@ export class AuthController {
                 mobileLogin['otp'] = null;
                 const userData = await AppDataSource.getRepository(User).save(mobileLogin);
 
-                return sendResponse(res, StatusCodes.OK, "OTP Send Successfully", userData);
+                const token = jwt.sign({ userId: mobileLogin?.id }, "dHPaQEEL]Y]5X;HOAC[kF1DNF(9eC4vs", { expiresIn: '8h' });
+
+                return sendResponse(res, StatusCodes.OK, "OTP Verify Successfully", userData, null, token);
+
+                // return sendResponse(res, StatusCodes.OK, "OTP Verify Successfully", userData);
             } else {
                 return errorResponse(res, StatusCodes.NOT_FOUND, 'Invalid OTP');
             }
