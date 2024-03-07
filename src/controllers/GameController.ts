@@ -10,6 +10,7 @@ import { GameStatus, PlayerStatus } from "../constants/gameStatus";
 import { getIO } from "../socket/socket";
 import { INTERNAL_SERVER_ERROR } from "../constants/message";
 import { ReasonMaster } from '../entity/gameCancelReasonMaster.entity';
+import { ReferCommission } from '../entity/referCommission.entity';
 
 export class GameController {
     // create game
@@ -333,6 +334,36 @@ export class GameController {
                 gameDetails['status'] = GameStatus.Completed;
 
                 await AppDataSource.getRepository(GameTable).save(gameDetails);
+            }
+
+            const user: any = await AppDataSource.getRepository(User).findOne({
+                where: { id: req?.userId }
+            });
+
+            if (user && (user.reference_user_id != 0 || user.reference_user_id != null)) {
+
+                const gameDetail: any = await AppDataSource.getRepository(GameTable).findOne({
+                    where: { id: Number(winPayload?.game_table_id) }
+                });
+
+                const adminCommission: any = await AppDataSource.getRepository(AdminCommission).findOne({
+                    where: { is_active: 1 }
+                });
+
+                const adminCommissionRs = ((gameDetail?.amount * 2) * adminCommission.commission) / 100;
+
+                const referCommission: any = await AppDataSource.getRepository(ReferCommission).findOne({
+                    where: { is_active: 1 }
+                });
+
+                const referCommissionRs = (adminCommissionRs * referCommission.commission) / 100;
+
+                const referUser: any = await AppDataSource.getRepository(User).findOne({
+                    where: { id: user.reference_user_id }
+                });
+
+                referUser.amount = referUser.amount + referCommissionRs;
+                await AppDataSource.getRepository(User).save(referUser);
             }
 
             return sendResponse(res, StatusCodes.OK, "Successfully update", savedDetails);
