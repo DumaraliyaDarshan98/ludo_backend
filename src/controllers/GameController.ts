@@ -29,30 +29,20 @@ export class GameController {
             const getCommission = await AppDataSource.getRepository(AdminCommission).find();
 
             // origin data
-            const options = {
-                method: 'GET',
-                url: 'https://ludoking-api-with-result.p.rapidapi.com/rapidapi/results/classic/',
-                headers: {
-                    'X-RapidAPI-Key': 'cdb375f6ccmsh5c088e8ad7ca632p1e0041jsn2fe08856ffac',
-                    'X-RapidAPI-Host': 'ludoking-api-with-result.p.rapidapi.com'
-                }
-            };
-
-            // testing data
             // const options = {
             //     method: 'GET',
             //     url: 'https://ludoking-api-with-result.p.rapidapi.com/rapidapi/results/classic/',
             //     headers: {
-            //         'X-RapidAPI-Key': 'asasascdb375f6ccmsh5c088e8ad7ca632p1e0041jsn2fe08856ffac',
+            //         'X-RapidAPI-Key': 'cdb375f6ccmsh5c088e8ad7ca632p1e0041jsn2fe08856ffac',
             //         'X-RapidAPI-Host': 'ludoking-api-with-result.p.rapidapi.com'
             //     }
             // };
 
-            const gameCodeAPIRes: any = await axios.request(options);
+            // const gameCodeAPIRes: any = await axios.request(options);
 
-            if (!gameCodeAPIRes?.data['roomcode']) {
-                return errorResponse(res, StatusCodes.NOT_FOUND, 'Game Code Not Found');
-            }
+            // if (!gameCodeAPIRes?.data['roomcode']) {
+            //     return errorResponse(res, StatusCodes.NOT_FOUND, 'Game Code Not Found');
+            // }
 
             // const gameCode = "09287844";
 
@@ -65,7 +55,6 @@ export class GameController {
             const winnerAmount = (Number(gameTableDetails?.amount) * 2) - ownerCommission;
 
             const payload = {
-                game_code: gameCodeAPIRes?.data['roomcode'],
                 amount: gameTableDetails?.amount,
                 winner_amount: String(winnerAmount),
                 admin_commission: String(ownerCommission),
@@ -340,7 +329,7 @@ export class GameController {
                 where: { id: req?.userId }
             });
 
-            if (user && (user.reference_user_id != 0 || user.reference_user_id != null)) {
+            if (user && (user.reference_user_id != 0)) {
 
                 const gameDetail: any = await AppDataSource.getRepository(GameTable).findOne({
                     where: { id: Number(winPayload?.game_table_id) }
@@ -350,19 +339,32 @@ export class GameController {
                     where: { is_active: 1 }
                 });
 
-                const adminCommissionRs = ((gameDetail?.amount * 2) * adminCommission.commission) / 100;
+                // if (!adminCommission?.commission) {
+                //     adminCommission['commission'] = 0;
+                // }
+
+                const adminCommissionRs = ((Number(gameDetail?.amount) * 2) * Number(adminCommission?.commission) || 0) / 100;
 
                 const referCommission: any = await AppDataSource.getRepository(ReferCommission).findOne({
                     where: { is_active: 1 }
-                });
+                }); 
 
-                const referCommissionRs = (adminCommissionRs * referCommission.commission) / 100;
+                // console.log('referCommissionreferCommission', referCommission)
+
+                // if (!referCommission?.commission) {
+                //     referCommission['commission'] = 0;
+                // }
+                // console.log('referCommissioncommission', referCommission['commission'])
+                const referCommissionRs = (Number(adminCommissionRs) * Number(referCommission?.commission) || 0) / 100;
+
+                console.log('user.reference_user_id', user.reference_user_id);
 
                 const referUser: any = await AppDataSource.getRepository(User).findOne({
-                    where: { id: user.reference_user_id }
+                    where: { id: Number(user.reference_user_id) }
                 });
 
-                referUser.amount = referUser.amount + referCommissionRs;
+                console.log('referUserreferUser', referUser)
+                referUser.amount = Number(referUser?.amount) + Number(referCommissionRs);
                 await AppDataSource.getRepository(User).save(referUser);
             }
 
@@ -464,8 +466,8 @@ export class GameController {
         try {
             const cancelDetails = req?.body;
 
-            let gameTable : any = await AppDataSource.getRepository(GameTable).findOne({
-                where : { id : Number(cancelDetails?.game_table_id) }
+            let gameTable: any = await AppDataSource.getRepository(GameTable).findOne({
+                where: { id: Number(cancelDetails?.game_table_id) }
             });
 
             gameTable['status'] = GameStatus.Cancel;
@@ -475,15 +477,15 @@ export class GameController {
             const savedData = await AppDataSource.getRepository(GameTable).save(gameTable);
 
             const playerList = await AppDataSource.getRepository(GamePlayer).find({
-                where : { game_table_id : Number(cancelDetails?.game_table_id) }
+                where: { game_table_id: Number(cancelDetails?.game_table_id) }
             });
 
             await playerList?.map(async (player) => {
                 player['p_status'] = PlayerStatus.Cancel;
                 await AppDataSource.getRepository(GamePlayer).save(player);
 
-                let userData : any = await AppDataSource.getRepository(User).findOne({
-                    where : { id : Number(player?.p_id) }
+                let userData: any = await AppDataSource.getRepository(User).findOne({
+                    where: { id: Number(player?.p_id) }
                 });
                 const amount = Number(userData['amount']) + Number(gameTable['amount']);
                 userData['amount'] = String(amount);
@@ -491,13 +493,13 @@ export class GameController {
                 console.log('userData', userData);
 
                 await AppDataSource.getRepository(User).save(userData);
-            });  
+            });
 
             setTimeout(() => {
                 const io = getIO();
                 io.emit('create_battle', { title: 'Create Game' });
             }, 1000);
-            
+
             return sendResponse(res, StatusCodes.OK, "Game Canceled.", savedData);
         } catch (error) {
             console.error('Win game result user can upload it : ', error);
@@ -526,7 +528,7 @@ export class GameController {
                 io.emit('generate_game_code', { title: 'Generate Game', data: { game_table_id: game_table_id, user_id: user_id } });
             }, 1000);
 
-            return sendResponse(res, StatusCodes.OK, "Game Canceled.", savedData);
+            return sendResponse(res, StatusCodes.OK, "Game Generated Successfully.", savedData);
         } catch (error) {
             console.error('Win game result user can upload it : ', error);
             return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR, error);
