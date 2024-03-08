@@ -504,4 +504,32 @@ export class GameController {
             return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR, error);
         }
     }
+
+    public async addGameCode(req: any, res: any) {
+        try {
+            const { game_table_id, user_id, game_code } = req?.body;
+
+            let gameTable: any = await AppDataSource.getRepository(GameTable).findOne({
+                where: { id: Number(game_table_id) }
+            });
+
+            if (!gameTable) {
+                return errorResponse(res, StatusCodes.NOT_FOUND, 'Game table not found');
+            }
+
+            gameTable['game_code'] = game_code;
+
+            const savedData = await AppDataSource.getRepository(GameTable).save(gameTable);
+
+            setTimeout(() => {
+                const io = getIO();
+                io.emit('generate_game_code', { title: 'Generate Game', data: { game_table_id: game_table_id, user_id: user_id } });
+            }, 1000);
+
+            return sendResponse(res, StatusCodes.OK, "Game Canceled.", savedData);
+        } catch (error) {
+            console.error('Win game result user can upload it : ', error);
+            return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR, error);
+        }
+    }
 }
