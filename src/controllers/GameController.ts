@@ -273,7 +273,7 @@ export class GameController {
         try {
 
             let query = await AppDataSource.getRepository(GameTable).createQueryBuilder('game_table');
-
+            query = query.andWhere(`game_table.id = :gameBattleId`, { gameBattleId: gameBattleId })
             query = query.leftJoinAndSelect('game_table.gameOwner', 'users');
             query = query.leftJoinAndSelect('game_table.gamePlayer', 'game_player');
             query = query.leftJoinAndSelect('game_player.playerOne', 'owner')
