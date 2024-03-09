@@ -12,8 +12,8 @@ export const AppDataSource = new DataSource({
   entities: ["src/entity/{*.ts, *.js}"],
   // entities: ["dist/entity/*.entity.js"],
   // entities: ["entity/*.entity.{ts,js}"],
-  logging: false,
-  synchronize: false,
+  logging: true,
+  synchronize: true,
 });
 
 // export const AppDataSource = new DataSource({

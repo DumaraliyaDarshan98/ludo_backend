@@ -125,7 +125,7 @@ export class UserController {
                     customer_name: userDetails.full_name
                 },
                 link_notify: {
-                    send_sms: true,
+                    send_sms: false,
                     send_email: false
                 },
                 link_meta: {
@@ -276,6 +276,10 @@ export class UserController {
         try {
             const withdrawDetails = req?.body;
 
+            if(Number(withdrawDetails?.amount) < 190) {
+                return errorResponse(res, StatusCodes.NOT_FOUND, 'Withdraw Min Amount Rs. 190');
+            }
+
             const addWithdraw = await AppDataSource.getRepository(Withdraw).save(withdrawDetails);
 
             return sendResponse(res, StatusCodes.OK, "Withdraw Amount Request Send Successfully", addWithdraw);
@@ -292,6 +296,24 @@ export class UserController {
             });
 
             return sendResponse(res, StatusCodes.OK, "Withdraw history", withdrawHistory);
+        } catch (error) {
+            return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR, error);
+        }
+    }
+
+    // get withdraw history
+    public async getWithdrawDetails(req:any, res:any) {
+        try {
+            const details = await AppDataSource.getRepository(Withdraw).findOne({
+                where : { id : Number(req.params.id) },
+                relations : ['userDetail']
+            });
+
+            if(!details) {
+                return errorResponse(res, StatusCodes.NOT_FOUND, 'Details Not Found');
+            }
+
+            return sendResponse(res, StatusCodes.OK, "Withdraw Details Get Successfully", details);
         } catch (error) {
             return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR, error);
         }
