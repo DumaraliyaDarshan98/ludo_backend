@@ -1,3 +1,4 @@
+import path from "path";
 import { DataSource } from "typeorm";
 
 // export const AppDataSource = new DataSource({
@@ -16,6 +17,17 @@ import { DataSource } from "typeorm";
 //   synchronize: true,
 // });
 
+// const path = require('path');
+
+// For JavaScript Entities
+const javascriptEntitiesPath = path.join(__dirname, 'entity', '*.entity.js');
+
+// For TypeScript Entities
+const typescriptEntitiesPath = path.join(__dirname, 'entity', '*.entity.ts');
+
+// For Both JavaScript and TypeScript Entities
+const entitiesPath = [typescriptEntitiesPath];
+
 export const AppDataSource = new DataSource({
   type: "mysql",
   host: "127.0.0.1",
@@ -26,7 +38,7 @@ export const AppDataSource = new DataSource({
   // database: "ludo_game",
   database: "ludo_game",
 //  entities: ["src/entity/{*.ts, *.js}"],
-  entities: ["dist/entity/*.entity.js"],
+  entities: entitiesPath,
   // entities: ["entity/*.entity.{ts,js}"],
   logging: true,
   synchronize: true,
