@@ -27,7 +27,7 @@ const javascriptEntitiesPath = path_1.default.join(__dirname, 'entity', '*.entit
 // For TypeScript Entities
 const typescriptEntitiesPath = path_1.default.join(__dirname, 'entity', '*.entity.ts');
 // For Both JavaScript and TypeScript Entities
-const entitiesPath = [typescriptEntitiesPath];
+const entitiesPath = [javascriptEntitiesPath];
 exports.AppDataSource = new typeorm_1.DataSource({
     type: "mysql",
     host: "127.0.0.1",
