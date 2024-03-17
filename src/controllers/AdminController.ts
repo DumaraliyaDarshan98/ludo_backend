@@ -10,6 +10,8 @@ import { GameTable } from "../entity/gameTable.entity";
 import { AdminCommission } from "../entity/adminCommission.entity";
 import { ReferCommission } from "../entity/referCommission.entity";
 import { ReferTable } from "../entity/referUser.entiry";
+import { GamePlayer } from "../entity/gamePlayer.entity";
+import { GameStatus } from "../constants/gameStatus";
 
 export class AdminController {
     public async updateAdmin(req: any, res: any) {
@@ -340,9 +342,83 @@ export class AdminController {
         try {
             const commissionDetails = await AppDataSource.getRepository(ReferCommission).find();
 
-            const referCommission : any = commissionDetails?.length > 0 ?  commissionDetails[0] : {};
+            const referCommission: any = commissionDetails?.length > 0 ? commissionDetails[0] : {};
 
             return sendResponse(res, StatusCodes.OK, "Get Refer Commission Details Successfully.", referCommission);
+        } catch (error) {
+            console.log('error', error);
+            return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR, error);
+        }
+    }
+
+    // admin upload custom result
+    public async verifyResult(req: any, res: any) {
+        try {
+            const resultDetails = req?.body;
+
+            const gameDetails: any = await AppDataSource.getRepository(GameTable).findOne({
+                where: { id: resultDetails.game_table_id }
+            });
+
+            resultDetails?.playerDetails?.map(async (element: any) => {
+                const playerDetails: any = await AppDataSource.getRepository(GamePlayer).findOne({
+                    where: { p_id: element.id, game_table_id: resultDetails.game_table_id }
+                });
+
+                if(playerDetails['p_status'] != '6' && element?.status == '6') {
+                    playerDetails['p_status'] = element?.status;
+
+                    const updatePlayer = await AppDataSource.getRepository(GamePlayer).save(playerDetails);
+    
+                    if (updatePlayer['p_status'] == '6') {
+                        const userDetails: any = await AppDataSource.getRepository(User).findOne({
+                            where: { id: element?.id }
+                        });
+    
+                        if (gameDetails['winner_amount'] == '0' || !gameDetails['winner_amount']) {
+                            gameDetails['winner_amount'] = '0';
+                        }
+                        const totalAmount = Number(userDetails['amount']) + Number(gameDetails['winner_amount']);
+    
+                        userDetails['amount'] = String(totalAmount);
+    
+                        await AppDataSource.getRepository(User).save(userDetails);
+                    }
+                } if (playerDetails['p_status'] == '6' && element?.status == '6') {
+                    playerDetails['p_status'] = element?.status;
+
+                    await AppDataSource.getRepository(GamePlayer).save(playerDetails);
+                } if (playerDetails['p_status'] == '6' && element?.status == '7') {
+                    playerDetails['p_status'] = element?.status;
+
+                    const updatePlayer = await AppDataSource.getRepository(GamePlayer).save(playerDetails);
+    
+                    if (updatePlayer['p_status'] == '7') {
+                        const userDetails: any = await AppDataSource.getRepository(User).findOne({
+                            where: { id: element?.id }
+                        });
+    
+                        if (gameDetails['winner_amount'] == '0' || !gameDetails['winner_amount']) {
+                            gameDetails['winner_amount'] = '0';
+                        }
+                        const totalAmount = Number(userDetails['amount']) - Number(gameDetails['winner_amount']);
+    
+                        userDetails['amount'] = String(totalAmount);
+    
+                        await AppDataSource.getRepository(User).save(userDetails);
+                    }
+                } else {
+                    playerDetails['p_status'] = element?.status;
+
+                    await AppDataSource.getRepository(GamePlayer).save(playerDetails);
+                }
+            });
+
+            gameDetails['status'] = GameStatus.Completed;
+
+            const updateGameStatus = await AppDataSource.getRepository(GameTable).save(gameDetails);
+
+            return sendResponse(res, StatusCodes.OK, "Get Refer Commission Details Successfully.", updateGameStatus);
         } catch (error) {
             console.log('error', error);
             return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR, error);
